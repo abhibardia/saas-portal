@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 export default function UsersPage() {
   const [users, setUsers] = useState<{id: string, username: string, email: string, role: string, createdAt: string}[]>([]);
@@ -27,7 +28,9 @@ export default function UsersPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
         <h2>Manage Users</h2>
-        <button className="primary-btn">+ Add User</button>
+        <Link href="/users/new">
+          <button className="primary-btn">+ Add User</button>
+        </Link>
       </div>
 
       {error && <p className="text-red-500 mb-4">{error}</p>}
