@@ -16,6 +16,10 @@
   - Fixed linting error related to Next.js `<Link>` usage.
 
 ## Week 2
-- Designed Drizzle schema for tenants, users, and transactions.
-- Documented API specs and User Flows in `docs/`.
-- Created React skeleton UI wireframes for dashboard and core routes.
+- **Date:** 2026-07-17
+- **Commit hash:** 13d193c
+- **Live URL:** https://saas-portal-eight.vercel.app/
+- **Summary:**
+  - Designed Drizzle schema for tenants, users, and transactions.
+  - Documented API specs and User Flows in `docs/`.
+  - Created React skeleton UI wireframes for dashboard and core routes.
