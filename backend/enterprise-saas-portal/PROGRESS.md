@@ -1,9 +1,9 @@
 # Progress
 
 ## Week 1
-- **Date:** [TBD]
-- **Commit hash:** [TBD]
-- **Live URL:** [TBD]
+- **Date:** 2026-07-17
+- **Commit hash:** adb5401
+- **Live URL:** https://saas-portal-eight.vercel.app/
 - **Summary:**
   - Audited legacy `frontend/` (Vite) and `backend/` (Python) folders. Backend logic was irrelevant to the new domain, and frontend was just Vite boilerplate.
   - Migrated the codebase to a single unified Next.js (App Router) project at the repo root.
