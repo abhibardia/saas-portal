@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/ToastProvider';
 
 export default function NewTransactionPage() {
   const [type, setType] = useState('credit');
   const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
+  const { showToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,13 +25,16 @@ export default function NewTransactionPage() {
       if (!res.ok) {
         const data = await res.json();
         setError(data.error || 'Failed to create transaction');
+        showToast(data.error || 'Failed to create transaction', 'error');
         return;
       }
 
+      showToast('Transaction created successfully!', 'success');
       router.push('/transactions');
       router.refresh();
     } catch (err) {
       setError('An error occurred');
+      showToast('An error occurred', 'error');
     }
   };
 

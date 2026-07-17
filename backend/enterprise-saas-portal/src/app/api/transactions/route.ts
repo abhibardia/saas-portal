@@ -6,8 +6,8 @@ import { decrypt } from '@/lib/auth';
 import { z } from 'zod';
 
 const createTxSchema = z.object({
-  type: z.string().min(1),
-  amount: z.string().min(1), // Drizzle decimal maps to string initially
+  type: z.string().min(1, { message: "Transaction type is required" }),
+  amount: z.string().min(1, { message: "Transaction amount is required" }), // Drizzle decimal maps to string initially
 });
 
 export async function GET(request: NextRequest) {
@@ -20,10 +20,10 @@ export async function GET(request: NextRequest) {
     // Depending on role, filter
     let allTx;
     if (session.role === 'admin') {
-      allTx = await db.select().from(transactions);
+      allTx = await db.select().from(transactions).limit(100);
     } else {
       // Just an example, maybe they can only see their own tenant's transactions
-      allTx = await db.select().from(transactions); 
+      allTx = await db.select().from(transactions).limit(100); 
     }
 
     return NextResponse.json({ data: allTx });
@@ -42,7 +42,10 @@ export async function POST(request: NextRequest) {
     
     const result = createTxSchema.safeParse(body);
     if (!result.success) {
-      return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
+      return NextResponse.json({ 
+        error: result.error.issues[0].message,
+        details: result.error.issues 
+      }, { status: 400 });
     }
 
     if (!session.tenantId) {

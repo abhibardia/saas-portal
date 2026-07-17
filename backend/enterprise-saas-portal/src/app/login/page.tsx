@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/ToastProvider';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
+  const { showToast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,13 +25,16 @@ export default function LoginPage() {
       if (!res.ok) {
         const data = await res.json();
         setError(data.error || 'Login failed');
+        showToast(data.error || 'Login failed', 'error');
         return;
       }
 
+      showToast('Logged in successfully!', 'success');
       router.push('/');
       router.refresh();
     } catch (err) {
       setError('An error occurred');
+      showToast('An error occurred', 'error');
     }
   };
 

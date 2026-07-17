@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/ToastProvider';
 
 export default function NewUserPage() {
   const [username, setUsername] = useState('');
@@ -10,6 +11,7 @@ export default function NewUserPage() {
   const [role, setRole] = useState('end_user');
   const [error, setError] = useState('');
   const router = useRouter();
+  const { showToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,13 +27,16 @@ export default function NewUserPage() {
       if (!res.ok) {
         const data = await res.json();
         setError(data.error || 'Failed to create user');
+        showToast(data.error || 'Failed to create user', 'error');
         return;
       }
 
+      showToast('User created successfully!', 'success');
       router.push('/users');
       router.refresh();
     } catch (err) {
       setError('An error occurred');
+      showToast('An error occurred', 'error');
     }
   };
 

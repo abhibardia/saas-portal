@@ -7,8 +7,8 @@ import * as bcrypt from 'bcryptjs';
 import { z } from 'zod';
 
 const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
+  email: z.string().email({ message: "Invalid email address" }),
+  password: z.string().min(1, { message: "Password is required" }),
 });
 
 export async function POST(request: Request) {
@@ -17,7 +17,10 @@ export async function POST(request: Request) {
     const result = loginSchema.safeParse(body);
     
     if (!result.success) {
-      return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
+      return NextResponse.json({ 
+        error: result.error.issues[0].message,
+        details: result.error.issues
+      }, { status: 400 });
     }
 
     const { email, password } = result.data;

@@ -7,15 +7,15 @@ import { z } from 'zod';
 import * as bcrypt from 'bcryptjs';
 
 const createUserSchema = z.object({
-  username: z.string().min(1),
-  email: z.string().email(),
-  password: z.string().min(6),
+  username: z.string().min(3, { message: "Username must be at least 3 characters long" }),
+  email: z.string().email({ message: "Invalid email address" }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters long" }),
   role: z.enum(['admin', 'tenant_owner', 'end_user']).default('end_user'),
 });
 
 export async function GET() {
   try {
-    const allUsers = await db.select().from(users);
+    const allUsers = await db.select().from(users).limit(100);
     const safeUsers = allUsers.map(({ password, ...user }) => user);
     return NextResponse.json({ data: safeUsers });
   } catch (error) {
@@ -33,7 +33,10 @@ export async function POST(request: NextRequest) {
     
     const result = createUserSchema.safeParse(body);
     if (!result.success) {
-      return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
+      return NextResponse.json({ 
+        error: result.error.issues[0].message,
+        details: result.error.issues 
+      }, { status: 400 });
     }
 
     if (!session.tenantId && result.data.role !== 'admin') {
