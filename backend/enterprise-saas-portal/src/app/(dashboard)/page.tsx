@@ -2,6 +2,8 @@ import { db } from '@/db';
 import { tenants, users, transactions } from '@/db/schema';
 import { count, sum, desc } from 'drizzle-orm';
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
   // Fetch aggregate data
   const [tenantCountResult] = await db.select({ value: count() }).from(tenants);
