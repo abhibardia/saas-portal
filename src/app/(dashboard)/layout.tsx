@@ -1,5 +1,7 @@
 import './dashboard.css';
 
+import Link from 'next/link';
+
 export default function DashboardLayout({
   children,
 }: {
@@ -12,10 +14,10 @@ export default function DashboardLayout({
           <h2>SaaS Portal</h2>
         </div>
         <nav className="nav-links">
-          <a href="/" className="nav-item active">Dashboard</a>
-          <a href="/tenants" className="nav-item">Tenants</a>
-          <a href="/users" className="nav-item">Users</a>
-          <a href="/transactions" className="nav-item">Transactions</a>
+          <Link href="/" className="nav-item active">Dashboard</Link>
+          <Link href="/tenants" className="nav-item">Tenants</Link>
+          <Link href="/users" className="nav-item">Users</Link>
+          <Link href="/transactions" className="nav-item">Transactions</Link>
         </nav>
         <div className="user-profile">
           <div className="avatar">U</div>

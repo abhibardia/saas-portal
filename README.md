@@ -1,35 +1,20 @@
-# AI Digital Passport
+# Enterprise Multi-Tenant SaaS Portal
 
-AI + Blockchain product authenticity verification system prototype.
+A multi-tenant admin dashboard replacing legacy CRM consoles. 
+Built with Next.js (App Router), PostgreSQL, Drizzle ORM, and strict TypeScript.
 
-## Setup & Running Locally
+## Architecture
+- **Framework**: Next.js (App Router)
+- **Language**: TypeScript (Strict Mode)
+- **Database**: PostgreSQL
+- **ORM**: Drizzle
+- **Auth**: JWT-based role authorization (Admin, End User, Tenant Owner)
 
-This project consists of a React frontend and a FastAPI backend.
+## Development
+Run the dev server:
+```bash
+npm run dev
+```
 
-### 1. Backend
-
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-2. Activate the virtual environment:
-   - Windows: `.\venv\Scripts\Activate`
-   - Mac/Linux: `source venv/bin/activate`
-3. Run the backend server:
-   ```bash
-   uvicorn main:app --reload
-   ```
-   The backend will be running at `http://localhost:8000`. 
-   You can verify it by visiting `http://localhost:8000/health`.
-
-### 2. Frontend
-
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-2. Run the development server:
-   ```bash
-   npm run dev
-   ```
-   The frontend will be running at `http://localhost:5173`.
+## Projects Included
+- Project A — Enterprise Multi-Tenant SaaS Portal
