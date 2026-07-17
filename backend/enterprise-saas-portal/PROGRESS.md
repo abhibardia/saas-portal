@@ -29,3 +29,10 @@
 - [x] Create login flow and protect routes with middleware (`proxy.ts`)
 - [x] Implement API endpoints (`/api/tenants`, `/api/users`, `/api/transactions`)
 - [x] Connect Next.js frontend to API endpoints
+
+## Week 4: Enhancements & Polish [COMPLETED]
+- [x] Comprehensive data validation with Zod and standardized API errors
+- [x] Robust error handling with Global Error Boundary and custom 404 page
+- [x] Custom lightweight Toast Notification System
+- [x] Route transition skeleton loaders and dashboard CSS hover enhancements
+- [x] Query limits added to backend endpoints for performance

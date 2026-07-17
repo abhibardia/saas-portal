@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 export default function TenantsPage() {
   const [tenants, setTenants] = useState<{id: string, name: string, description: string, createdAt: string}[]>([]);
@@ -27,7 +28,9 @@ export default function TenantsPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
         <h2>Manage Tenants</h2>
-        <button className="primary-btn">+ Add Tenant</button>
+        <Link href="/tenants/new">
+          <button className="primary-btn">+ Add Tenant</button>
+        </Link>
       </div>
 
       {error && <p className="text-red-500 mb-4">{error}</p>}
@@ -60,7 +63,9 @@ export default function TenantsPage() {
                   <td>{tenant.description}</td>
                   <td>{new Date(tenant.createdAt).toLocaleDateString()}</td>
                   <td>
-                    <button className="primary-btn" style={{ padding: '6px 12px', fontSize: '0.8rem', backgroundColor: '#475569' }}>Edit</button>
+                    <Link href={`/tenants/${tenant.id}/edit`}>
+                      <button className="primary-btn" style={{ padding: '6px 12px', fontSize: '0.8rem', backgroundColor: '#475569' }}>Edit</button>
+                    </Link>
                   </td>
                 </tr>
               ))

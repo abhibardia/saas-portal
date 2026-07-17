@@ -39,17 +39,16 @@ export default function NewTransactionPage() {
   };
 
   return (
-    <div className="max-w-md bg-white p-6 rounded shadow">
-      <h2 className="text-xl font-bold mb-4">New Transaction</h2>
-      {error && <div className="text-red-500 mb-4">{error}</div>}
+    <div className="form-container">
+      <h2 className="text-xl font-bold mb-6 text-white">New Transaction</h2>
+      {error && <div className="text-red-500 mb-4 bg-red-500/10 p-3 rounded">{error}</div>}
       
       <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2">Type</label>
+        <div className="form-group">
+          <label>Type</label>
           <select 
             value={type} 
             onChange={e => setType(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded text-black"
           >
             <option value="credit">Credit</option>
             <option value="debit">Debit</option>
@@ -57,14 +56,13 @@ export default function NewTransactionPage() {
           </select>
         </div>
         
-        <div className="mb-6">
-          <label className="block text-gray-700 mb-2">Amount</label>
+        <div className="form-group mb-8">
+          <label>Amount</label>
           <input 
             type="number" 
             step="0.01"
             value={amount} 
             onChange={e => setAmount(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded text-black"
             required
             placeholder="0.00"
           />

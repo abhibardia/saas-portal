@@ -41,47 +41,43 @@ export default function NewUserPage() {
   };
 
   return (
-    <div className="max-w-md bg-white p-6 rounded shadow text-black">
-      <h2 className="text-xl font-bold mb-4">Add New User</h2>
-      {error && <div className="text-red-500 mb-4">{error}</div>}
+    <div className="form-container">
+      <h2 className="text-xl font-bold mb-6 text-white">Add New User</h2>
+      {error && <div className="text-red-500 mb-4 bg-red-500/10 p-3 rounded">{error}</div>}
       
       <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2">Username</label>
+        <div className="form-group">
+          <label>Username</label>
           <input 
             type="text" 
             value={username} 
             onChange={e => setUsername(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
             required
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2">Email</label>
+        <div className="form-group">
+          <label>Email</label>
           <input 
             type="email" 
             value={email} 
             onChange={e => setEmail(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
             required
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2">Password</label>
+        <div className="form-group">
+          <label>Password</label>
           <input 
             type="password" 
             value={password} 
             onChange={e => setPassword(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
             required
           />
         </div>
-        <div className="mb-6">
-          <label className="block text-gray-700 mb-2">Role</label>
+        <div className="form-group mb-8">
+          <label>Role</label>
           <select 
             value={role} 
             onChange={e => setRole(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
           >
             <option value="end_user">End User</option>
             <option value="tenant_owner">Tenant Owner</option>
