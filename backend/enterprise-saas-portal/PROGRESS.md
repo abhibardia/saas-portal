@@ -23,3 +23,9 @@
   - Designed Drizzle schema for tenants, users, and transactions.
   - Documented API specs and User Flows in `docs/`.
   - Created React skeleton UI wireframes for dashboard and core routes.
+
+## Week 3: Backend Authentication & Authorization [COMPLETED]
+- [x] Integrate `jose` for JWT sessions
+- [x] Create login flow and protect routes with middleware (`proxy.ts`)
+- [x] Implement API endpoints (`/api/tenants`, `/api/users`, `/api/transactions`)
+- [x] Connect Next.js frontend to API endpoints

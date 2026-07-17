@@ -1,6 +1,7 @@
 import './dashboard.css';
 
 import Link from 'next/link';
+import LogoutButton from '@/components/LogoutButton';
 
 export default function DashboardLayout({
   children,
@@ -27,7 +28,7 @@ export default function DashboardLayout({
       <main className="main-content">
         <header className="top-header">
           <h1>Overview</h1>
-          <button className="primary-btn">Logout</button>
+          <LogoutButton />
         </header>
         <div className="content-area">
           {children}
