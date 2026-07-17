@@ -3,6 +3,8 @@ import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
+import { decrypt } from '@/lib/auth';
+import * as bcrypt from 'bcryptjs';
 
 const updateUserSchema = z.object({
   username: z.string().min(3).optional(),
@@ -13,7 +15,20 @@ const updateUserSchema = z.object({
 
 export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
+    const sessionCookie = request.headers.get('cookie')?.match(/session=([^;]+)/)?.[1] || 
+                         (request as any).cookies?.get('session')?.value;
+    
+    // Fallback decrypt if we somehow get it
+    if (!sessionCookie) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const session = await decrypt(sessionCookie);
+
     const params = await context.params;
+    
+    // Users can only update their own profile, or admins can update anyone
+    if (session.role !== 'admin' && session.userId !== params.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const body = await request.json();
     const result = updateUserSchema.safeParse(body);
 
@@ -32,11 +47,26 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
   }
 }
 
-export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
+    const sessionCookie = request.headers.get('cookie')?.match(/session=([^;]+)/)?.[1];
+    if (!sessionCookie) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    
+    const session = await decrypt(sessionCookie);
     const params = await context.params;
-    await db.delete(users).where(eq(users.id, params.id));
-    return NextResponse.json({ success: true });
+
+    if (session.role !== 'admin' && session.userId !== params.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const user = await db.select().from(users).where(eq(users.id, params.id)).limit(1);
+
+    if (!user.length) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    const { password: _, ...safeUser } = user[0];
+    return NextResponse.json({ data: safeUser });
   } catch (error) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }

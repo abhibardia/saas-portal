@@ -7,8 +7,13 @@ export default function TenantsPage() {
   const [tenants, setTenants] = useState<{id: string, name: string, description: string, createdAt: string}[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
+    fetch('/api/auth/me')
+      .then(res => res.json())
+      .then(data => setRole(data.role))
+      .catch(() => {});
     fetch('/api/tenants')
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch');
@@ -28,9 +33,11 @@ export default function TenantsPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
         <h2>Manage Tenants</h2>
-        <Link href="/tenants/new">
-          <button className="primary-btn">+ Add Tenant</button>
-        </Link>
+        {role === 'admin' && (
+          <Link href="/tenants/new">
+            <button className="primary-btn">+ Add Tenant</button>
+          </Link>
+        )}
       </div>
 
       {error && <p className="text-red-500 mb-4">{error}</p>}

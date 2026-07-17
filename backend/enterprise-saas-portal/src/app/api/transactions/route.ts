@@ -4,6 +4,7 @@ import { transactions } from '@/db/schema';
 import type { NextRequest } from 'next/server';
 import { decrypt } from '@/lib/auth';
 import { z } from 'zod';
+import { eq } from 'drizzle-orm';
 
 const createTxSchema = z.object({
   type: z.string().min(1, { message: "Transaction type is required" }),
@@ -17,13 +18,15 @@ export async function GET(request: NextRequest) {
     
     const session = await decrypt(sessionCookie);
 
-    // Depending on role, filter
     let allTx;
     if (session.role === 'admin') {
       allTx = await db.select().from(transactions).limit(100);
+    } else if (session.role === 'tenant_owner') {
+      if (!session.tenantId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      allTx = await db.select().from(transactions).where(eq(transactions.tenantId, session.tenantId)).limit(100);
     } else {
-      // Just an example, maybe they can only see their own tenant's transactions
-      allTx = await db.select().from(transactions).limit(100); 
+      // End users see only their own transactions
+      allTx = await db.select().from(transactions).where(eq(transactions.userId, session.userId)).limit(100);
     }
 
     return NextResponse.json({ data: allTx });

@@ -6,6 +6,8 @@ import { decrypt } from '@/lib/auth';
 import { z } from 'zod';
 import * as bcrypt from 'bcryptjs';
 
+import { eq } from 'drizzle-orm';
+
 const createUserSchema = z.object({
   username: z.string().min(3, { message: "Username must be at least 3 characters long" }),
   email: z.string().email({ message: "Invalid email address" }),
@@ -13,9 +15,22 @@ const createUserSchema = z.object({
   role: z.enum(['admin', 'tenant_owner', 'end_user']).default('end_user'),
 });
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const allUsers = await db.select().from(users).limit(100);
+    const sessionCookie = request.cookies.get('session')?.value;
+    if (!sessionCookie) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const session = await decrypt(sessionCookie);
+
+    let allUsers;
+    if (session.role === 'admin') {
+      allUsers = await db.select().from(users).limit(100);
+    } else if (session.role === 'tenant_owner') {
+      if (!session.tenantId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      allUsers = await db.select().from(users).where(eq(users.tenantId, session.tenantId)).limit(100);
+    } else {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const safeUsers = allUsers.map(({ password, ...user }) => user);
     return NextResponse.json({ data: safeUsers });
   } catch (error) {
@@ -37,6 +52,10 @@ export async function POST(request: NextRequest) {
         error: result.error.issues[0].message,
         details: result.error.issues 
       }, { status: 400 });
+    }
+
+    if (session.role === 'end_user') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     if (!session.tenantId && result.data.role !== 'admin') {

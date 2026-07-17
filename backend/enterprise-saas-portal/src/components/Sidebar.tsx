@@ -2,16 +2,22 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Building2, Users, ArrowRightLeft } from 'lucide-react';
+import { LayoutDashboard, Building2, Users, ArrowRightLeft, UserCircle } from 'lucide-react';
 
-export default function Sidebar() {
+interface SidebarProps {
+  role?: string;
+  username?: string;
+}
+
+export default function Sidebar({ role = 'end_user', username = 'User' }: SidebarProps) {
   const pathname = usePathname();
 
   const navItems = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-    { name: 'Tenants', href: '/tenants', icon: Building2 },
+    ...(role !== 'end_user' ? [{ name: 'Tenants', href: '/tenants', icon: Building2 }] : []),
     { name: 'Users', href: '/users', icon: Users },
     { name: 'Transactions', href: '/transactions', icon: ArrowRightLeft },
+    { name: 'Profile', href: '/users/profile', icon: UserCircle },
   ];
 
   return (
@@ -37,8 +43,11 @@ export default function Sidebar() {
         })}
       </nav>
       <div className="user-profile">
-        <div className="avatar">A</div>
-        <span>Admin User</span>
+        <div className="avatar">{username.charAt(0).toUpperCase()}</div>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span>{username}</span>
+          <span style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'capitalize' }}>{role.replace('_', ' ')}</span>
+        </div>
       </div>
     </aside>
   );
