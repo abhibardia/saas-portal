@@ -2,6 +2,8 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const postgres = require('postgres');
+require('dotenv').config();
 
 const app = express();
 app.use(cors());
@@ -9,35 +11,42 @@ app.use(cors());
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*', // Allow Next.js frontend to connect
+    origin: '*',
     methods: ['GET', 'POST']
   }
 });
 
-// State
-let tasks = [
-  { id: 't1', title: 'Research Socket.io', status: 'To Do' },
-  { id: 't2', title: 'Setup Next.js', status: 'In Progress' },
-  { id: 't3', title: 'Design Database', status: 'Done' }
-];
+const sql = postgres(process.env.DATABASE_URL);
 
-// Map socketId -> cursor {x, y, color, name}
+// Map socketId -> presence {id, x, y, color, name}
 const presenceMap = new Map();
-
 const colors = ['#f87171', '#fb923c', '#fbbf24', '#a3e635', '#34d399', '#2dd4bf', '#38bdf8', '#818cf8', '#c084fc', '#f472b6'];
 
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
   console.log('Client connected:', socket.id);
+  
+  // Create a default board if none exists
+  let boardResult = await sql`SELECT id FROM boards LIMIT 1`;
+  let boardId;
+  
+  if (boardResult.length === 0) {
+    // Generate mock workspace and board
+    const wsResult = await sql`INSERT INTO workspaces (name) VALUES ('Global Workspace') RETURNING id`;
+    const wsId = wsResult[0].id;
+    const bResult = await sql`INSERT INTO boards (workspace_id, name) VALUES (${wsId}, 'Main Board') RETURNING id`;
+    boardId = bResult[0].id;
+  } else {
+    boardId = boardResult[0].id;
+  }
 
-  // Initialize presence for new connection
+  // Load initial tasks from DB
+  const tasks = await sql`SELECT * FROM tasks WHERE board_id = ${boardId}`;
+
   const color = colors[Math.floor(Math.random() * colors.length)];
   const name = 'User ' + Math.floor(Math.random() * 1000);
-  presenceMap.set(socket.id, { x: 0, y: 0, color, name });
+  presenceMap.set(socket.id, { id: socket.id, x: 0, y: 0, color, name });
 
-  // Send initial state to the client
   socket.emit('init-tasks', tasks);
-  
-  // Broadcast presence updates
   io.emit('presence-update', Array.from(presenceMap.entries()));
 
   socket.on('cursor-move', ({ x, y }) => {
@@ -49,23 +58,21 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('task-move', ({ id, newStatus }) => {
-    const task = tasks.find((t) => t.id === id);
-    if (task) {
-      task.status = newStatus;
-      // Broadcast to everyone
-      io.emit('task-update', tasks);
-    }
+  socket.on('task-move', async ({ id, newStatus }) => {
+    // Update DB
+    await sql`UPDATE tasks SET status = ${newStatus} WHERE id = ${id}`;
+    
+    // Broadcast updated tasks
+    const updatedTasks = await sql`SELECT * FROM tasks WHERE board_id = ${boardId}`;
+    io.emit('task-update', updatedTasks);
   });
 
-  socket.on('task-add', ({ title }) => {
-    const newTask = {
-      id: 't' + Date.now(),
-      title,
-      status: 'To Do'
-    };
-    tasks.push(newTask);
-    io.emit('task-update', tasks);
+  socket.on('task-add', async ({ title }) => {
+    await sql`INSERT INTO tasks (board_id, title, status) VALUES (${boardId}, ${title}, 'To Do')`;
+    
+    // Broadcast updated tasks
+    const updatedTasks = await sql`SELECT * FROM tasks WHERE board_id = ${boardId}`;
+    io.emit('task-update', updatedTasks);
   });
 
   socket.on('disconnect', () => {
@@ -77,5 +84,5 @@ io.on('connection', (socket) => {
 
 const PORT = 3001;
 server.listen(PORT, () => {
-console.log('Socket.io WebSocket server running on port ' + PORT);
+  console.log('Socket.io WebSocket server running on port ' + PORT);
 });

@@ -1,7 +1,22 @@
 import LiveCursors from '@/components/live/LiveCursors';
 import KanbanBoard from '@/components/live/KanbanBoard';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { verifyToken } from '@/lib/auth';
 
-export default function Home() {
+export default async function Home() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('auth_token')?.value;
+
+  if (!token) {
+    redirect('/login');
+  }
+
+  const user = await verifyToken(token);
+  if (!user) {
+    redirect('/login');
+  }
+
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 relative overflow-hidden">
       {/* Abstract Background Elements */}
@@ -16,7 +31,7 @@ export default function Home() {
             Real-Time Workspace
           </h1>
           <p className="text-slate-600 dark:text-slate-400 mt-4 max-w-2xl mx-auto">
-            Experience real-time collaboration with live cursors and instant state synchronization. Open this page in multiple browser windows to see it in action.
+            Logged in as {user.name} ({user.email}). Experience real-time collaboration with live cursors and instant state synchronization.
           </p>
         </div>
         
