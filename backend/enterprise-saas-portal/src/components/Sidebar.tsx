@@ -18,6 +18,7 @@ export default function Sidebar({ role = 'end_user', username = 'User' }: Sideba
     { name: 'Users', href: '/users', icon: Users },
     { name: 'Transactions', href: '/transactions', icon: ArrowRightLeft },
     { name: 'Profile', href: '/users/profile', icon: UserCircle },
+    { name: 'Workspace (Live)', href: 'http://localhost:3004', icon: Users, external: true },
   ];
 
   return (
@@ -35,6 +36,7 @@ export default function Sidebar({ role = 'end_user', username = 'User' }: Sideba
               key={item.href} 
               href={item.href} 
               className={`nav-item ${isActive ? 'active' : ''}`}
+              {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
             >
               <Icon size={20} className="nav-icon" />
               <span>{item.name}</span>
