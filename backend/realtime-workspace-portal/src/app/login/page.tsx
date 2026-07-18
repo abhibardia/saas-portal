@@ -2,18 +2,17 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
     const payload = isLogin ? { email, password } : { name, email, password };
@@ -30,9 +29,10 @@ export default function LoginPage() {
         throw new Error(data.error || 'Authentication failed');
       }
 
+      toast.success(isLogin ? 'Logged in successfully!' : 'Account created successfully!');
       router.push('/');
     } catch (err: any) {
-      setError(err.message);
+      toast.error(err.message);
     }
   };
 
@@ -85,8 +85,6 @@ export default function LoginPage() {
               className="w-full bg-slate-900/50 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-
-          {error && <div className="text-red-400 text-sm mt-2">{error}</div>}
 
           <button
             type="submit"

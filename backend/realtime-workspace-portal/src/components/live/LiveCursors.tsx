@@ -16,8 +16,14 @@ export default function LiveCursors() {
   const socket = getSocket();
 
   useEffect(() => {
+    let lastEmit = 0;
+    
     const handleMouseMove = (e: MouseEvent) => {
-      socket.emit('cursor-move', { x: e.clientX, y: e.clientY });
+      const now = Date.now();
+      if (now - lastEmit > 50) { // Throttle to 50ms
+        socket.emit('cursor-move', { x: e.clientX, y: e.clientY });
+        lastEmit = now;
+      }
     };
 
     window.addEventListener('mousemove', handleMouseMove);

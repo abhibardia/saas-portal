@@ -59,20 +59,46 @@ io.on('connection', async (socket) => {
   });
 
   socket.on('task-move', async ({ id, newStatus }) => {
-    // Update DB
-    await sql`UPDATE tasks SET status = ${newStatus} WHERE id = ${id}`;
-    
-    // Broadcast updated tasks
-    const updatedTasks = await sql`SELECT * FROM tasks WHERE board_id = ${boardId}`;
-    io.emit('task-update', updatedTasks);
+    try {
+      if (!id || !newStatus) throw new Error('Invalid payload');
+      // Update DB
+      await sql`UPDATE tasks SET status = ${newStatus} WHERE id = ${id}`;
+      
+      // Broadcast updated tasks
+      const updatedTasks = await sql`SELECT * FROM tasks WHERE board_id = ${boardId}`;
+      io.emit('task-update', updatedTasks);
+    } catch (err) {
+      console.error(err);
+      socket.emit('error', { message: 'Failed to move task' });
+    }
   });
 
   socket.on('task-add', async ({ title }) => {
-    await sql`INSERT INTO tasks (board_id, title, status) VALUES (${boardId}, ${title}, 'To Do')`;
-    
-    // Broadcast updated tasks
-    const updatedTasks = await sql`SELECT * FROM tasks WHERE board_id = ${boardId}`;
-    io.emit('task-update', updatedTasks);
+    try {
+      if (!title || title.trim() === '') throw new Error('Invalid title');
+      await sql`INSERT INTO tasks (board_id, title, status) VALUES (${boardId}, ${title}, 'To Do')`;
+      
+      // Broadcast updated tasks
+      const updatedTasks = await sql`SELECT * FROM tasks WHERE board_id = ${boardId}`;
+      io.emit('task-update', updatedTasks);
+    } catch (err) {
+      console.error(err);
+      socket.emit('error', { message: 'Failed to add task' });
+    }
+  });
+
+  socket.on('task-delete', async ({ id }) => {
+    try {
+      if (!id) throw new Error('Invalid task ID');
+      await sql`DELETE FROM tasks WHERE id = ${id}`;
+      
+      // Broadcast updated tasks
+      const updatedTasks = await sql`SELECT * FROM tasks WHERE board_id = ${boardId}`;
+      io.emit('task-update', updatedTasks);
+    } catch (err) {
+      console.error(err);
+      socket.emit('error', { message: 'Failed to delete task' });
+    }
   });
 
   socket.on('disconnect', () => {

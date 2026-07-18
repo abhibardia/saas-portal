@@ -3,14 +3,18 @@ import { db } from '@/db';
 import { users } from '@/db/schema';
 import { hashPassword, signToken } from '@/lib/auth';
 import { eq } from 'drizzle-orm';
+import { registerSchema } from '@/lib/validations';
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password } = await req.json();
+    const body = await req.json();
+    const result = registerSchema.safeParse(body);
 
-    if (!name || !email || !password) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!result.success) {
+      return NextResponse.json({ error: result.error.errors[0].message }, { status: 400 });
     }
+
+    const { name, email, password } = result.data;
 
     // Check if user exists
     const existingUser = await db.select().from(users).where(eq(users.email, email));

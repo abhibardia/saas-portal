@@ -4,16 +4,21 @@ import { users } from '@/db/schema';
 import { comparePassword, signToken } from '@/lib/auth';
 import { eq } from 'drizzle-orm';
 
+import { loginSchema } from '@/lib/validations';
+
 export async function POST(req: Request) {
   try {
-    const { email, password } = await req.json();
+    const body = await req.json();
+    const result = loginSchema.safeParse(body);
 
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Missing credentials' }, { status: 400 });
+    if (!result.success) {
+      return NextResponse.json({ error: result.error.errors[0].message }, { status: 400 });
     }
 
-    const result = await db.select().from(users).where(eq(users.email, email));
-    const user = result[0];
+    const { email, password } = result.data;
+
+    const dbResult = await db.select().from(users).where(eq(users.email, email));
+    const user = dbResult[0];
 
     if (!user) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
